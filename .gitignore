@@ -1,0 +1,8 @@
+# Abaikan file sensitif dan database
+db-data/
+node_modules/
+*.log
+.env
+__pycache__/
+*.pyc
+.DS_Store

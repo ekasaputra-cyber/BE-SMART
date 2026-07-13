@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: smart_cert_db
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  ai-service:
+    build: ./ai-service
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+    depends_on:
+      - db
+
+  blockchain-service:
+    build: ./blockchain-service
+    container_name: blockchain-service
+    ports:
+      - "9000:9000"
+    networks:
+      - app-network
+    depends_on:
+      - db
+
+  api-gateway:
+    build: ./api-gateway
+    volumes:
+      - ./api-gateway:/app
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - db
+      - ai-service
+      - blockchain-service
+
+networks:
+  app-network:
+    driver: bridge
