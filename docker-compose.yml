@@ -1,15 +1,17 @@
 services:
   db:
     image: postgres:15-alpine
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: smart_cert_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - ./db-data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
     networks:
       - app-network
-
   ai-service:
     build: ./ai-service
     ports:
@@ -18,7 +20,6 @@ services:
       - app-network
     depends_on:
       - db
-
   blockchain-service:
     build: ./blockchain-service
     container_name: blockchain-service
@@ -28,9 +29,10 @@ services:
       - app-network
     depends_on:
       - db
-
   api-gateway:
     build: ./api-gateway
+    env_file:
+      - .env
     volumes:
       - ./api-gateway:/app
     ports:
@@ -41,7 +43,6 @@ services:
       - db
       - ai-service
       - blockchain-service
-
 networks:
   app-network:
     driver: bridge
